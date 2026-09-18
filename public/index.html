@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>钟表稳定性预警台</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">🕰️</span>
+      <div>
+        <h1>钟表稳定性预警台</h1>
+        <p class="subtitle">沿用既有调校与复测数据 · 最新复测振幅较前一次下降超过 <b>20°</b> 自动预警</p>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <span id="autoState" class="auto-state">自动刷新 30s 已开启</span>
+      <button id="refreshBtn" class="btn">手动刷新</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar">
+      <section class="panel">
+        <h2>筛选</h2>
+        <div id="statusFilters" class="status-filters">
+          <button class="chip active" data-status="all">全部 <span class="count" data-count="all">0</span></button>
+          <button class="chip chip-unconfirmed" data-status="unconfirmed">待确认 <span class="count" data-count="unconfirmed">0</span></button>
+          <button class="chip chip-confirmed" data-status="confirmed">已确认 <span class="count" data-count="confirmed">0</span></button>
+          <button class="chip chip-cleared" data-status="cleared">已清除 <span class="count" data-count="cleared">0</span></button>
+        </div>
+        <label class="field">
+          <span>钟表</span>
+          <select id="clockFilter">
+            <option value="">全部钟表</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>按编号 / 擒纵机构搜索</span>
+          <input id="keywordFilter" type="search" placeholder="如 CLK-1890 / 杠杆式" />
+        </label>
+      </section>
+
+      <section class="panel">
+        <h2>录入</h2>
+        <p class="muted">选择钟表后在历史中录入新调校或复测；新调校会立即清除其当期预警。</p>
+        <label class="field">
+          <span>选择钟表</span>
+          <select id="entryClockSelect"></select>
+        </label>
+        <button id="openEntryBtn" class="btn btn-primary btn-block">查看历史并录入</button>
+      </section>
+
+      <p class="updated-at">数据更新于 <span id="updatedAt">—</span></p>
+    </aside>
+
+    <section class="content">
+      <div id="warningList" class="warning-list"></div>
+      <div id="emptyState" class="empty-state hidden">没有符合条件的预警记录</div>
+      <div id="loadingState" class="empty-state">加载中…</div>
+    </section>
+  </main>
+
+  <!-- 预警确认 -->
+  <div id="confirmModal" class="modal-mask hidden">
+    <div class="modal">
+      <div class="modal-head">
+        <h3>确认处理预警</h3>
+        <button class="icon-btn" data-close="confirmModal">×</button>
+      </div>
+      <div id="confirmContext" class="confirm-context"></div>
+      <form id="confirmForm">
+        <label class="field">
+          <span>处理人 <em>*</em></span>
+          <input name="confirmedBy" maxlength="50" required placeholder="请输入处理人姓名" />
+        </label>
+        <label class="field">
+          <span>处理说明</span>
+          <textarea name="confirmNote" rows="3" placeholder="处置措施、复查结论等"></textarea>
+        </label>
+        <p class="form-hint">同一预警只能确认一次，提交后不可重复确认。</p>
+        <div class="modal-actions">
+          <button type="button" class="btn" data-close="confirmModal">取消</button>
+          <button type="submit" class="btn btn-primary">提交确认</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 历史 / 录入 -->
+  <div id="historyModal" class="modal-mask hidden">
+    <div class="modal modal-wide">
+      <div class="modal-head">
+        <h3 id="historyTitle">钟表历史</h3>
+        <button class="icon-btn" data-close="historyModal">×</button>
+      </div>
+      <div id="historyBody"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

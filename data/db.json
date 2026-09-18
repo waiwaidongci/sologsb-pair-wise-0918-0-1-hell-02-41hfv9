@@ -6,8 +6,35 @@
       "escapementType": "瑞士杠杆式",
       "balanceFrequency": "18000vph",
       "targetDailyRateSeconds": 20,
-      "note": "怀表机芯，走时偏快",
-      "createdAt": "2026-06-16T00:00:00.000Z"
+      "note": "怀表机芯，走时偏快，近期摆幅下滑",
+      "createdAt": "2026-09-08T01:00:00.000Z"
+    },
+    {
+      "id": "clock_2",
+      "code": "CLK-1875-02",
+      "escapementType": "英国锚式",
+      "balanceFrequency": "18000vph",
+      "targetDailyRateSeconds": 25,
+      "note": "陀飞轮台钟，振幅曾异常下降",
+      "createdAt": "2026-09-02T01:00:00.000Z"
+    },
+    {
+      "id": "clock_3",
+      "code": "CLK-1923-11",
+      "escapementType": "圆柱式",
+      "balanceFrequency": "21600vph",
+      "targetDailyRateSeconds": 30,
+      "note": "腕表机芯，已二次调校恢复稳定",
+      "createdAt": "2026-08-18T01:00:00.000Z"
+    },
+    {
+      "id": "clock_4",
+      "code": "CLK-2001-03",
+      "escapementType": "同轴擒纵",
+      "balanceFrequency": "28800vph",
+      "targetDailyRateSeconds": 15,
+      "note": "新到机芯，基线稳定",
+      "createdAt": "2026-08-30T01:00:00.000Z"
     }
   ],
   "adjustments": [
@@ -18,19 +45,174 @@
       "direction": "慢针方向",
       "amount": "游丝快慢针向慢侧微调0.4格",
       "note": "初次调校，先保守处理",
-      "createdAt": "2026-06-16T00:00:00.000Z"
+      "createdAt": "2026-09-10T02:00:00.000Z"
+    },
+    {
+      "id": "adjustment_c2a",
+      "clockId": "clock_2",
+      "currentDailyRateSeconds": 41,
+      "direction": "快针方向",
+      "amount": "外桩向快侧微调0.2格",
+      "note": "日差偏大，小幅修正",
+      "createdAt": "2026-09-05T01:00:00.000Z"
+    },
+    {
+      "id": "adjustment_c3a",
+      "clockId": "clock_3",
+      "currentDailyRateSeconds": 55,
+      "direction": "慢针方向",
+      "amount": "快慢针向慢侧调0.5格",
+      "note": "首轮调校",
+      "createdAt": "2026-08-20T01:00:00.000Z"
+    },
+    {
+      "id": "adjustment_c3b",
+      "clockId": "clock_3",
+      "currentDailyRateSeconds": 47,
+      "direction": "慢针方向",
+      "amount": "清洗摆轮轴后重新加油，快慢针回正0.1格",
+      "note": "针对摆幅骤降进行二次调校，当期预警随之清除",
+      "createdAt": "2026-09-10T07:00:00.000Z"
+    },
+    {
+      "id": "adjustment_c4a",
+      "clockId": "clock_4",
+      "currentDailyRateSeconds": 12,
+      "direction": "无",
+      "amount": "仅做基线记录，未动快慢针",
+      "note": "出厂参数良好",
+      "createdAt": "2026-09-01T01:00:00.000Z"
     }
   ],
   "retests": [
     {
-      "id": "retest_demo",
+      "id": "retest_c1a",
       "clockId": "clock_demo",
       "adjustmentId": "adjustment_demo",
-      "testedAt": "2026-06-16T00:00:00.000Z",
+      "testedAt": "2026-09-11T03:00:00.000Z",
       "dailyRateSeconds": 31,
-      "amplitude": 248,
+      "amplitude": 278,
       "qualified": false,
-      "note": "仍偏快，振幅尚可"
+      "note": "仍偏快，振幅正常"
+    },
+    {
+      "id": "retest_c1b",
+      "clockId": "clock_demo",
+      "adjustmentId": "adjustment_demo",
+      "testedAt": "2026-09-16T06:30:00.000Z",
+      "dailyRateSeconds": 42,
+      "amplitude": 235,
+      "qualified": false,
+      "note": "摆幅明显下滑，怀疑油泥干涩"
+    },
+    {
+      "id": "retest_c2a",
+      "clockId": "clock_2",
+      "adjustmentId": "adjustment_c2a",
+      "testedAt": "2026-09-06T02:00:00.000Z",
+      "dailyRateSeconds": 22,
+      "amplitude": 270,
+      "qualified": true,
+      "note": "日差进入目标范围"
+    },
+    {
+      "id": "retest_c2b",
+      "clockId": "clock_2",
+      "adjustmentId": "adjustment_c2a",
+      "testedAt": "2026-09-12T08:00:00.000Z",
+      "dailyRateSeconds": 24,
+      "amplitude": 232,
+      "qualified": true,
+      "note": "振幅异常下降，需检查擒纵轮"
+    },
+    {
+      "id": "retest_c2c",
+      "clockId": "clock_2",
+      "adjustmentId": "adjustment_c2a",
+      "testedAt": "2026-09-17T08:30:00.000Z",
+      "dailyRateSeconds": 18,
+      "amplitude": 241,
+      "qualified": true,
+      "note": "处理后振幅回升，继续观察"
+    },
+    {
+      "id": "retest_c3a",
+      "clockId": "clock_3",
+      "adjustmentId": "adjustment_c3a",
+      "testedAt": "2026-08-21T02:00:00.000Z",
+      "dailyRateSeconds": 38,
+      "amplitude": 260,
+      "qualified": false,
+      "note": "首轮复测"
+    },
+    {
+      "id": "retest_c3b",
+      "clockId": "clock_3",
+      "adjustmentId": "adjustment_c3a",
+      "testedAt": "2026-08-25T03:30:00.000Z",
+      "dailyRateSeconds": 40,
+      "amplitude": 225,
+      "qualified": false,
+      "note": "摆幅骤降，首轮监测期预警"
+    },
+    {
+      "id": "retest_c3c",
+      "clockId": "clock_3",
+      "adjustmentId": "adjustment_c3b",
+      "testedAt": "2026-09-12T02:00:00.000Z",
+      "dailyRateSeconds": 21,
+      "amplitude": 266,
+      "qualified": true,
+      "note": "二次调校后复测，振幅恢复"
+    },
+    {
+      "id": "retest_c3d",
+      "clockId": "clock_3",
+      "adjustmentId": "adjustment_c3b",
+      "testedAt": "2026-09-17T02:30:00.000Z",
+      "dailyRateSeconds": 19,
+      "amplitude": 262,
+      "qualified": true,
+      "note": "振幅波动4度，稳定"
+    },
+    {
+      "id": "retest_c4a",
+      "clockId": "clock_4",
+      "adjustmentId": "adjustment_c4a",
+      "testedAt": "2026-09-03T02:00:00.000Z",
+      "dailyRateSeconds": 8,
+      "amplitude": 292,
+      "qualified": true,
+      "note": "基线复测"
+    },
+    {
+      "id": "retest_c4b",
+      "clockId": "clock_4",
+      "adjustmentId": "adjustment_c4a",
+      "testedAt": "2026-09-15T04:00:00.000Z",
+      "dailyRateSeconds": 9,
+      "amplitude": 289,
+      "qualified": true,
+      "note": "振幅波动3度，无异常"
+    }
+  ],
+  "warnings": [
+    {
+      "id": "warning_c2b",
+      "clockId": "clock_2",
+      "retestId": "retest_c2b",
+      "previousRetestId": "retest_c2a",
+      "periodStartAdjustmentId": "adjustment_c2a",
+      "periodStartedAt": "2026-09-05T01:00:00.000Z",
+      "previousAmplitude": 270,
+      "latestAmplitude": 232,
+      "amplitudeDrop": 38,
+      "triggeredRetestAt": "2026-09-12T08:00:00.000Z",
+      "createdAt": "2026-09-12T08:00:00.000Z",
+      "status": "confirmed",
+      "confirmedBy": "李瑾",
+      "confirmedAt": "2026-09-13T01:20:00.000Z",
+      "confirmNote": "已清洗摆轴并重加油，振幅回升，持续观察"
     }
   ]
 }
