@@ -8,6 +8,15 @@
       "targetDailyRateSeconds": 20,
       "note": "怀表机芯，走时偏快",
       "createdAt": "2026-06-16T00:00:00.000Z"
+    },
+    {
+      "id": "clock_legacy",
+      "code": "CLK-1901-12",
+      "escapementType": "同轴擒纵",
+      "balanceFrequency": "28800vph",
+      "targetDailyRateSeconds": 15,
+      "note": "古董台钟机芯，历史稳定性波动较大",
+      "createdAt": "2026-03-02T00:00:00.000Z"
     }
   ],
   "adjustments": [
@@ -19,6 +28,33 @@
       "amount": "游丝快慢针向慢侧微调0.4格",
       "note": "初次调校，先保守处理",
       "createdAt": "2026-06-16T00:00:00.000Z"
+    },
+    {
+      "id": "adjustment_legacy_1",
+      "clockId": "clock_legacy",
+      "currentDailyRateSeconds": 52,
+      "direction": "快针方向",
+      "amount": "游丝快慢针向快侧微调0.6格",
+      "note": "第一轮调校",
+      "createdAt": "2026-03-02T08:00:00.000Z"
+    },
+    {
+      "id": "adjustment_legacy_2",
+      "clockId": "clock_legacy",
+      "currentDailyRateSeconds": 14,
+      "direction": "慢针方向",
+      "amount": "向慢侧微调0.2格",
+      "note": "第二轮精调",
+      "createdAt": "2026-03-09T02:00:00.000Z"
+    },
+    {
+      "id": "adjustment_legacy_3",
+      "clockId": "clock_legacy",
+      "currentDailyRateSeconds": 18,
+      "direction": "快针方向",
+      "amount": "向快侧微调0.15格",
+      "note": "振幅持续回落，重新调校并安排检查发条",
+      "createdAt": "2026-03-16T01:30:00.000Z"
     }
   ],
   "retests": [
@@ -31,6 +67,132 @@
       "amplitude": 248,
       "qualified": false,
       "note": "仍偏快，振幅尚可"
+    },
+    {
+      "id": "retest_demo_2",
+      "clockId": "clock_demo",
+      "adjustmentId": "adjustment_demo",
+      "testedAt": "2026-06-17T03:20:00.000Z",
+      "dailyRateSeconds": 44,
+      "amplitude": 196,
+      "qualified": false,
+      "note": "振幅明显回落，疑似发条动力不足"
+    },
+    {
+      "id": "retest_legacy_1_1",
+      "clockId": "clock_legacy",
+      "adjustmentId": "adjustment_legacy_1",
+      "testedAt": "2026-03-03T08:00:00.000Z",
+      "dailyRateSeconds": 22,
+      "amplitude": 270,
+      "qualified": false,
+      "note": "首轮调校后，振幅充足"
+    },
+    {
+      "id": "retest_legacy_1_2",
+      "clockId": "clock_legacy",
+      "adjustmentId": "adjustment_legacy_1",
+      "testedAt": "2026-03-05T08:00:00.000Z",
+      "dailyRateSeconds": 9,
+      "amplitude": 235,
+      "qualified": true,
+      "note": "走时达标，但振幅回落35度"
+    },
+    {
+      "id": "retest_legacy_2_1",
+      "clockId": "clock_legacy",
+      "adjustmentId": "adjustment_legacy_2",
+      "testedAt": "2026-03-10T08:00:00.000Z",
+      "dailyRateSeconds": 5,
+      "amplitude": 242,
+      "qualified": true,
+      "note": "精调后复测稳定"
+    },
+    {
+      "id": "retest_legacy_2_2",
+      "clockId": "clock_legacy",
+      "adjustmentId": "adjustment_legacy_2",
+      "testedAt": "2026-03-12T08:00:00.000Z",
+      "dailyRateSeconds": 4,
+      "amplitude": 216,
+      "qualified": true,
+      "note": "振幅又回落26度，持续观察"
+    },
+    {
+      "id": "retest_legacy_3_1",
+      "clockId": "clock_legacy",
+      "adjustmentId": "adjustment_legacy_3",
+      "testedAt": "2026-03-17T08:00:00.000Z",
+      "dailyRateSeconds": 8,
+      "amplitude": 265,
+      "qualified": true,
+      "note": "清洗保养后振幅恢复"
+    },
+    {
+      "id": "retest_legacy_3_2",
+      "clockId": "clock_legacy",
+      "adjustmentId": "adjustment_legacy_3",
+      "testedAt": "2026-03-19T08:00:00.000Z",
+      "dailyRateSeconds": 6,
+      "amplitude": 268,
+      "qualified": true,
+      "note": "振幅保持稳定"
+    }
+  ],
+  "warnings": [
+    {
+      "id": "warning_legacy_confirmed",
+      "key": "clock_legacy:retest_legacy_1_2",
+      "clockId": "clock_legacy",
+      "triggerRetestId": "retest_legacy_1_2",
+      "previousRetestId": "retest_legacy_1_1",
+      "periodAdjustmentId": "adjustment_legacy_1",
+      "amplitudeBefore": 270,
+      "amplitudeAfter": 235,
+      "amplitudeDrop": 35,
+      "createdAt": "2026-03-05T08:00:00.000Z",
+      "status": "confirmed",
+      "handledBy": "王师傅",
+      "confirmedAt": "2026-03-06T01:10:00.000Z",
+      "confirmNote": "擒纵轮检查无明显磨损，已安排清洗保养",
+      "periodEndsAt": "2026-03-09T02:00:00.000Z",
+      "endedByAdjustmentId": "adjustment_legacy_2"
+    },
+    {
+      "id": "warning_mu6m87m6_1pmj0u",
+      "key": "clock_demo:retest_demo_2",
+      "clockId": "clock_demo",
+      "triggerRetestId": "retest_demo_2",
+      "previousRetestId": "retest_demo",
+      "periodAdjustmentId": "adjustment_demo",
+      "amplitudeBefore": 248,
+      "amplitudeAfter": 196,
+      "amplitudeDrop": 52,
+      "createdAt": "2026-06-17T03:20:00.000Z",
+      "status": "unconfirmed",
+      "handledBy": "",
+      "confirmedAt": null,
+      "confirmNote": "",
+      "periodEndsAt": null,
+      "endedByAdjustmentId": null
+    },
+    {
+      "id": "warning_mu6m87m6_k91q9u",
+      "key": "clock_legacy:retest_legacy_2_2",
+      "clockId": "clock_legacy",
+      "triggerRetestId": "retest_legacy_2_2",
+      "previousRetestId": "retest_legacy_2_1",
+      "periodAdjustmentId": "adjustment_legacy_2",
+      "amplitudeBefore": 242,
+      "amplitudeAfter": 216,
+      "amplitudeDrop": 26,
+      "createdAt": "2026-03-12T08:00:00.000Z",
+      "status": "cleared",
+      "handledBy": "",
+      "confirmedAt": null,
+      "confirmNote": "",
+      "periodEndsAt": "2026-03-16T01:30:00.000Z",
+      "endedByAdjustmentId": "adjustment_legacy_3"
     }
   ]
 }

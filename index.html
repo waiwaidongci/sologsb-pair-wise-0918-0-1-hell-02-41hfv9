@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>钟表稳定性预警台</title>
+<style>
+  :root {
+    --bg: #f3f5f9;
+    --card: #ffffff;
+    --ink: #1f2733;
+    --ink-2: #5b6675;
+    --ink-3: #97a1b0;
+    --line: #e5e9f0;
+    --brand: #1f4e79;
+    --brand-weak: #eaf1f8;
+    --danger: #d43d3d;
+    --danger-weak: #fdeeee;
+    --warn: #c77700;
+    --warn-weak: #fdf4e3;
+    --ok: #1f8a52;
+    --ok-weak: #e8f6ee;
+    --grey-weak: #eef1f5;
+    --shadow: 0 1px 3px rgba(31, 39, 51, 0.08), 0 4px 16px rgba(31, 39, 51, 0.06);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 14px;
+  }
+  header.topbar {
+    background: linear-gradient(120deg, #163a5c, #1f4e79 60%, #2a6196);
+    color: #fff;
+    padding: 18px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  header.topbar h1 { font-size: 19px; margin: 0; letter-spacing: 1px; }
+  header.topbar .sub { opacity: .78; font-size: 12.5px; margin-top: 4px; }
+  .top-actions { display: flex; align-items: center; gap: 10px; }
+  .clock-pill {
+    background: rgba(255,255,255,.14);
+    border: 1px solid rgba(255,255,255,.22);
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-variant-numeric: tabular-nums;
+    font-size: 13px;
+  }
+  main { max-width: 1080px; margin: 0 auto; padding: 22px 24px 60px; }
+
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .tabs { display: flex; gap: 6px; background: var(--card); padding: 5px; border-radius: 10px; box-shadow: var(--shadow); }
+  .tab {
+    border: 0;
+    background: transparent;
+    padding: 7px 14px;
+    border-radius: 7px;
+    cursor: pointer;
+    color: var(--ink-2);
+    font-size: 13.5px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .tab:hover { background: var(--grey-weak); }
+  .tab.active { background: var(--brand); color: #fff; }
+  .tab .num {
+    background: var(--grey-weak);
+    border-radius: 999px;
+    padding: 1px 8px;
+    font-size: 12px;
+    min-width: 22px;
+    text-align: center;
+  }
+  .tab.active .num { background: rgba(255,255,255,.22); color: #fff; }
+  .tab.tab-danger.active { background: var(--danger); }
+  .tab.tab-ok.active { background: var(--ok); }
+  .tab.tab-grey.active { background: #6b7686; }
+
+  .search {
+    flex: 1;
+    min-width: 220px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 8px 13px;
+    box-shadow: var(--shadow);
+  }
+  .search input { border: 0; outline: none; flex: 1; font-size: 13.5px; color: var(--ink); background: transparent; }
+  .btn {
+    border: 1px solid var(--line);
+    background: var(--card);
+    border-radius: 9px;
+    padding: 8px 15px;
+    cursor: pointer;
+    font-size: 13.5px;
+    color: var(--ink);
+  }
+  .btn:hover { background: var(--grey-weak); }
+  .btn-primary { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .btn-primary:hover { background: #173d5f; }
+  .btn-danger { background: var(--danger); border-color: var(--danger); color: #fff; }
+  .btn-danger:hover { background: #b83232; }
+  .btn[disabled] { opacity: .55; cursor: not-allowed; }
+
+  .rule-banner {
+    background: var(--brand-weak);
+    border: 1px solid #d4e2f0;
+    color: #2c4f73;
+    border-radius: 10px;
+    padding: 10px 15px;
+    font-size: 12.5px;
+    margin-bottom: 16px;
+    line-height: 1.7;
+  }
+
+  .warning-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--ink-3);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    padding: 16px 18px;
+    margin-bottom: 12px;
+  }
+  .warning-card.unconfirmed { border-left-color: var(--danger); background: linear-gradient(180deg, #fff, #fffbfb); }
+  .warning-card.confirmed { border-left-color: var(--ok); }
+  .warning-card.cleared { border-left-color: var(--ink-3); }
+  .wc-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border-radius: 999px;
+    padding: 3px 11px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .badge.unconfirmed { background: var(--danger-weak); color: var(--danger); }
+  .badge.confirmed { background: var(--ok-weak); color: var(--ok); }
+  .badge.cleared { background: var(--grey-weak); color: var(--ink-2); }
+  .clock-link {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--brand);
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+  }
+  .clock-link:hover { text-decoration: underline; }
+  .clock-meta { color: var(--ink-3); font-size: 12.5px; }
+  .waiting {
+    margin-left: auto;
+    color: var(--danger);
+    font-size: 12.5px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .wc-body {
+    display: flex;
+    gap: 22px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+  }
+  .metric { min-width: 150px; }
+  .metric .label { color: var(--ink-3); font-size: 12px; }
+  .metric .value { margin-top: 3px; font-size: 15px; font-variant-numeric: tabular-nums; }
+  .amp-flow { display: inline-flex; align-items: center; gap: 8px; }
+  .amp-arrow { color: var(--danger); font-weight: 700; }
+  .drop-chip {
+    background: var(--danger-weak);
+    color: var(--danger);
+    border-radius: 6px;
+    padding: 1px 8px;
+    font-size: 12.5px;
+    font-weight: 700;
+  }
+  .wc-note { color: var(--ink-2); font-size: 13px; margin-top: 10px; }
+  .confirm-box {
+    margin-top: 13px;
+    border-top: 1px dashed var(--line);
+    padding-top: 13px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .confirm-box input[type=text] {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 8px 11px;
+    font-size: 13.5px;
+    outline: none;
+    min-width: 150px;
+  }
+  .confirm-box input[type=text]:focus { border-color: var(--brand); }
+  .confirm-box .note-input { flex: 1; min-width: 220px; }
+  .confirm-result {
+    margin-top: 12px;
+    background: var(--ok-weak);
+    border: 1px solid #cde8d8;
+    border-radius: 9px;
+    padding: 9px 13px;
+    font-size: 13px;
+    color: #22593b;
+    line-height: 1.8;
+  }
+  .cleared-info {
+    margin-top: 12px;
+    background: var(--grey-weak);
+    border-radius: 9px;
+    padding: 9px 13px;
+    font-size: 12.5px;
+    color: var(--ink-2);
+    line-height: 1.8;
+  }
+  .error-text { color: var(--danger); font-size: 12.5px; }
+
+  .empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--ink-3);
+    background: var(--card);
+    border: 1px dashed var(--line);
+    border-radius: 12px;
+  }
+  .empty .big { font-size: 34px; margin-bottom: 8px; }
+
+  /* 抽屉 */
+  .drawer-mask {
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 28, 40, .42);
+    display: none;
+    z-index: 40;
+  }
+  .drawer-mask.open { display: block; }
+  .drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(620px, 94vw);
+    background: var(--bg);
+    box-shadow: -8px 0 30px rgba(20,28,40,.18);
+    z-index: 41;
+    transform: translateX(102%);
+    transition: transform .22s ease;
+    display: flex;
+    flex-direction: column;
+  }
+  .drawer.open { transform: none; }
+  .drawer-head {
+    padding: 18px 22px;
+    background: var(--brand);
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .drawer-head h2 { margin: 0; font-size: 17px; }
+  .drawer-head .meta { opacity: .82; font-size: 12.5px; margin-top: 5px; line-height: 1.7; }
+  .drawer-close { background: rgba(255,255,255,.15); border: 0; color: #fff; font-size: 18px; border-radius: 8px; width: 32px; height: 32px; cursor: pointer; }
+  .drawer-body { overflow-y: auto; padding: 18px 22px 40px; }
+  .section-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink-2);
+    margin: 22px 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::before { content: ""; width: 4px; height: 14px; background: var(--brand); border-radius: 2px; }
+  form.entry {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 11px;
+    padding: 14px 15px;
+    box-shadow: var(--shadow);
+  }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .form-grid .full { grid-column: 1 / -1; }
+  form.entry label { display: block; font-size: 12px; color: var(--ink-2); margin-bottom: 4px; }
+  form.entry input, form.entry select, form.entry textarea {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 13px;
+    outline: none;
+    font-family: inherit;
+  }
+  form.entry input:focus, form.entry select:focus, form.entry textarea:focus { border-color: var(--brand); }
+  form.entry textarea { resize: vertical; min-height: 52px; }
+  form.entry .actions { margin-top: 11px; display: flex; gap: 9px; }
+
+  .record {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 11px 14px;
+    margin-bottom: 9px;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .record .r-head { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+  .record .r-time { color: var(--ink-3); font-size: 12px; }
+  .tag {
+    border-radius: 5px;
+    padding: 1px 7px;
+    font-size: 11.5px;
+    font-weight: 600;
+  }
+  .tag.ok { background: var(--ok-weak); color: var(--ok); }
+  .tag.no { background: var(--danger-weak); color: var(--danger); }
+  .tag.adj { background: var(--brand-weak); color: var(--brand); }
+  .record .r-body { color: var(--ink-2); margin-top: 3px; }
+  .mini-warning {
+    margin-top: 7px;
+    border-radius: 7px;
+    padding: 6px 10px;
+    font-size: 12.5px;
+    line-height: 1.7;
+  }
+  .mini-warning.unconfirmed { background: var(--danger-weak); color: #8c2b2b; }
+  .mini-warning.confirmed { background: var(--ok-weak); color: #22593b; }
+  .mini-warning.cleared { background: var(--grey-weak); color: var(--ink-2); }
+
+  /* Toast */
+  #toasts { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); z-index: 60; display: flex; flex-direction: column; gap: 9px; align-items: center; }
+  .toast {
+    background: #26323f;
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 9px;
+    font-size: 13.5px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.25);
+    animation: rise .2s ease;
+  }
+  .toast.ok { background: #1e6f46; }
+  .toast.err { background: #b83232; }
+  @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  .spin { display: inline-block; animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div>
+    <h1>🕰️ 钟表稳定性预警台</h1>
+    <div class="sub">同一监测期内，最新复测振幅较前一次下降超过 20° 自动生成预警 · 新调校即清期重测</div>
+  </div>
+  <div class="top-actions">
+    <label style="font-size:12.5px;opacity:.85;display:flex;align-items:center;gap:6px;cursor:pointer;">
+      <input type="checkbox" id="autoRefresh" checked /> 20秒自动刷新
+    </label>
+    <span class="clock-pill" id="clockPill">--:--:--</span>
+    <button class="btn" id="refreshBtn" style="background:rgba(255,255,255,.16);color:#fff;border-color:rgba(255,255,255,.25)">刷新</button>
+  </div>
+</header>
+
+<main>
+  <div class="rule-banner">
+    <b>规则：</b>每次调校开启新的监测期；同监测期内相邻两次复测，振幅由 A 降至 B 且 A − B &gt; 20° 时产生<span style="color:var(--danger)">待确认</span>预警。
+    待确认预警置顶并实时显示等待时长，每条预警仅可确认一次；写入新调校后当期预警立即转为<span style="color:var(--ink-2)">已清除</span>，但仍可在“已清除”与钟表历史中查看。
+  </div>
+
+  <div class="toolbar">
+    <div class="tabs" id="tabs">
+      <button class="tab active" data-status="all">全部 <span class="num" id="cnt-all">0</span></button>
+      <button class="tab tab-danger" data-status="unconfirmed">待确认 <span class="num" id="cnt-unconfirmed">0</span></button>
+      <button class="tab tab-ok" data-status="confirmed">已确认 <span class="num" id="cnt-confirmed">0</span></button>
+      <button class="tab tab-grey" data-status="cleared">已清除 <span class="num" id="cnt-cleared">0</span></button>
+    </div>
+    <div class="search">
+      <span>🔍</span>
+      <input id="searchInput" placeholder="搜索表号 / 擒纵类型 / 处理人 / 备注…" />
+    </div>
+  </div>
+
+  <div id="warningList"></div>
+</main>
+
+<!-- 钟表历史抽屉 -->
+<div class="drawer-mask" id="drawerMask"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-head">
+    <div>
+      <h2 id="dClockName">钟表历史</h2>
+      <div class="meta" id="dClockMeta"></div>
+    </div>
+    <button class="drawer-close" id="drawerClose">✕</button>
+  </div>
+  <div class="drawer-body" id="drawerBody">加载中…</div>
+</aside>
+
+<div id="toasts"></div>
+
+<script>
+const API = "";
+let currentStatus = "all";
+let currentKeyword = "";
+let warningsCache = [];
+let countsCache = { all: 0, unconfirmed: 0, confirmed: 0, cleared: 0 };
+let openClockId = null;
+let historyClockData = null;
+
+const $ = (sel, root = document) => root.querySelector(sel);
+const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+
+function api(path, options = {}) {
+  return fetch(API + path, {
+    headers: options.body ? { "Content-Type": "application/json" } : {},
+    ...options,
+    body: options.body ? JSON.stringify(options.body) : undefined
+  }).then(async (res) => {
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(json.error || `请求失败（${res.status}）`);
+    return json;
+  });
+}
+
+function toast(message, type = "") {
+  const el = document.createElement("div");
+  el.className = `toast ${type}`;
+  el.textContent = message;
+  $("#toasts").appendChild(el);
+  setTimeout(() => el.remove(), 3200);
+}
+
+function fmtTime(iso) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  return d.toLocaleString("zh-CN", { hour12: false });
+}
+
+function fmtDate(iso) {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleDateString("zh-CN");
+}
+
+function durationText(ms) {
+  const s = Math.max(0, Math.floor(ms / 1000));
+  const d = Math.floor(s / 86400);
+  const h = Math.floor((s % 86400) / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  if (d > 0) return `${d}天${h}小时`;
+  if (h > 0) return `${h}小时${m}分钟`;
+  if (m > 0) return `${m}分钟`;
+  return `${s}秒`;
+}
+
+function esc(text) {
+  return String(text ?? "").replace(/[&<>"']/g, (ch) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch])
+  );
+}
+
+/* ---------- 预警列表 ---------- */
+
+async function loadWarnings() {
+  const params = new URLSearchParams();
+  if (currentStatus !== "all") params.set("status", currentStatus);
+  if (currentKeyword) params.set("q", currentKeyword);
+  // counts 始终来自全量统计，不随筛选状态/关键词变化
+  const [listRes, allRes] = await Promise.all([
+    api(`/warnings?${params}`),
+    api("/warnings")
+  ]);
+  warningsCache = listRes.data;
+  countsCache = allRes.counts;
+  renderCounts();
+  renderList();
+}
+
+function renderCounts() {
+  $("#cnt-all").textContent = countsCache.all ?? 0;
+  $("#cnt-unconfirmed").textContent = countsCache.unconfirmed ?? 0;
+  $("#cnt-confirmed").textContent = countsCache.confirmed ?? 0;
+  $("#cnt-cleared").textContent = countsCache.cleared ?? 0;
+  document.title = `(${countsCache.unconfirmed || 0}) 钟表稳定性预警台`;
+}
+
+function renderList() {
+  const box = $("#warningList");
+  if (!warningsCache.length) {
+    box.innerHTML = `<div class="empty"><div class="big">🗒️</div>当前筛选下暂无预警记录</div>`;
+    return;
+  }
+  box.innerHTML = warningsCache.map(renderCard).join("");
+}
+
+function renderCard(w) {
+  const clock = w.clock || {};
+  const body = `
+    <div class="wc-body">
+      <div class="metric">
+        <div class="label">振幅变化（前次 → 最新）</div>
+        <div class="value amp-flow">
+          <span>${w.amplitudeBefore}°</span>
+          <span class="amp-arrow">→</span>
+          <span>${w.amplitudeAfter}°</span>
+          <span class="drop-chip">↓${w.amplitudeDrop}°</span>
+        </div>
+      </div>
+      <div class="metric">
+        <div class="label">触发复测时间</div>
+        <div class="value">${fmtTime(w.createdAt)}</div>
+      </div>
+      <div class="metric">
+        <div class="label">日差（秒/日）</div>
+        <div class="value">${w.triggerRetest ? `${w.triggerRetest.dailyRateSeconds > 0 ? "+" : ""}${w.triggerRetest.dailyRateSeconds}s` : "—"}</div>
+      </div>
+    </div>
+    ${w.triggerRetest && w.triggerRetest.note ? `<div class="wc-note">📝 ${esc(w.triggerRetest.note)}</div>` : ""}
+  `;
+
+  let footer = "";
+  if (w.status === "unconfirmed") {
+    footer = `
+      <div class="confirm-box" data-warning-id="${w.id}">
+        <input type="text" maxlength="50" placeholder="处理人姓名（必填）" class="handler-input" />
+        <input type="text" maxlength="200" placeholder="处理说明（选填）" class="note-input" />
+        <button class="btn btn-danger confirm-btn">确认处理</button>
+        <span class="error-text confirm-err"></span>
+      </div>`;
+  } else if (w.status === "confirmed") {
+    footer = `
+      <div class="confirm-result">
+        ✅ 已由 <b>${esc(w.handledBy)}</b> 于 ${fmtTime(w.confirmedAt)} 确认
+        ${w.confirmNote ? `<br />处理说明：${esc(w.confirmNote)}` : ""}
+      </div>`;
+  } else {
+    footer = `
+      <div class="cleared-info">
+        🔧 新调校写入后本监测期结束（${fmtTime(w.periodEndsAt)}），预警已清除并重新监测。
+        ${w.handledBy ? `清除前已由 <b>${esc(w.handledBy)}</b> 确认（${fmtTime(w.confirmedAt)}）。` : "清除前未经确认。"}
+      </div>`;
+  }
+
+  return `
+    <div class="warning-card ${w.status}" data-id="${w.id}">
+      <div class="wc-head">
+        <span class="badge ${w.status}">${w.statusText}</span>
+        <button class="clock-link" data-clock-id="${w.clockId}">${esc(clock.code || w.clockId)}</button>
+        <span class="clock-meta">${esc(clock.escapementType || "")} · ${esc(clock.balanceFrequency || "")}</span>
+        ${w.status === "unconfirmed"
+          ? `<span class="waiting" data-created="${w.createdAt}">⏱ 已等待 <span class="wait-val">…</span></span>`
+          : `<span class="clock-meta" style="margin-left:auto">${
+              w.status === "confirmed" ? `确认于 ${fmtDate(w.confirmedAt)}` : `清除于 ${fmtDate(w.periodEndsAt)}`
+            }</span>`}
+      </div>
+      ${body}
+      ${footer}
+    </div>`;
+}
+
+async function confirmWarning(warningId, button) {
+  const box = button.closest(".confirm-box");
+  const handler = $(".handler-input", box).value.trim();
+  const note = $(".note-input", box).value.trim();
+  const errEl = $(".confirm-err", box);
+  errEl.textContent = "";
+  if (!handler) {
+    errEl.textContent = "请填写处理人";
+    return;
+  }
+  button.disabled = true;
+  button.textContent = "提交中…";
+  try {
+    await api(`/warnings/${warningId}/confirm`, {
+      method: "POST",
+      body: { handledBy: handler, note }
+    });
+    toast("预警已确认，各入口结论已同步", "ok");
+    await loadWarnings();
+    if (openClockId) await loadHistory(openClockId, { silent: true });
+  } catch (error) {
+    errEl.textContent = error.message;
+    button.disabled = false;
+    button.textContent = "确认处理";
+  }
+}
+
+/* ---------- 钟表历史抽屉 ---------- */
+
+async function openHistory(clockId) {
+  openClockId = clockId;
+  $("#drawer").classList.add("open");
+  $("#drawerMask").classList.add("open");
+  await loadHistory(clockId);
+}
+
+async function loadHistory(clockId, { silent = false } = {}) {
+  const { data } = await api(`/clocks/${encodeURIComponent(clockId)}/history`);
+  historyClockData = data;
+  const clock = data.clock;
+  $("#dClockName").textContent = clock.code;
+  $("#dClockMeta").innerHTML = `
+    ${esc(clock.escapementType)} · ${esc(clock.balanceFrequency)} · 目标日差 ±${clock.targetDailyRateSeconds}s
+    ${clock.note ? `<br />${esc(clock.note)}` : ""}`;
+  renderDrawer(data);
+  if (!silent) return;
+}
+
+function renderDrawer(data) {
+  const { clock, warnings, retests, adjustments } = data;
+  const warningMap = new Map();
+  warnings.forEach((w) => {
+    if (!warningMap.has(w.triggerRetestId)) warningMap.set(w.triggerRetestId, w);
+  });
+
+  const retestHtml = retests.length
+    ? retests.map((r) => {
+        const w = warningMap.get(r.id);
+        return `
+        <div class="record">
+          <div class="r-head">
+            <b>复测</b>
+            <span class="r-time">${fmtTime(r.testedAt)}</span>
+            <span class="tag ${r.qualified ? "ok" : "no"}">${r.qualified ? "合格" : "不合格"}</span>
+            <span class="clock-meta">振幅 ${r.amplitude}° · 日差 ${r.dailyRateSeconds > 0 ? "+" : ""}${r.dailyRateSeconds}s</span>
+          </div>
+          ${r.note ? `<div class="r-body">${esc(r.note)}</div>` : ""}
+          ${w ? `<div class="mini-warning ${w.status}" data-warning-id="${w.id}">${miniWarningText(w)}</div>` : ""}
+        </div>`;
+      }).join("")
+    : `<div class="empty" style="padding:24px">暂无复测记录</div>`;
+
+  const adjustmentHtml = adjustments.length
+    ? adjustments.map((a) => `
+        <div class="record">
+          <div class="r-head">
+            <b>调校</b>
+            <span class="tag adj">${esc(a.direction)}</span>
+            <span class="r-time">${fmtTime(a.createdAt)}</span>
+            <span class="clock-meta">调校前日差 ${a.currentDailyRateSeconds}s</span>
+          </div>
+          <div class="r-body">${esc(a.amount)}${a.note ? ` —— ${esc(a.note)}` : ""}</div>
+        </div>`).join("")
+    : `<div class="empty" style="padding:24px">暂无调校记录</div>`;
+
+  const warningHtml = warnings.length
+    ? warnings.map((w) => `
+        <div class="mini-warning ${w.status}" style="margin-bottom:7px" data-warning-id="${w.id}">${miniWarningText(w)}</div>`).join("")
+    : `<div class="empty" style="padding:20px">该钟表暂无预警</div>`;
+
+  $("#drawerBody").innerHTML = `
+    <div class="section-title">相关预警（${warnings.length}）</div>
+    ${warningHtml}
+
+    <div class="section-title">登记新调校（写入后当期预警立即清除）</div>
+    <form class="entry" id="adjustmentForm">
+      <div class="form-grid">
+        <div>
+          <label>调校前日差（秒/日）</label>
+          <input name="currentDailyRateSeconds" type="number" step="0.1" required placeholder="如 44" />
+        </div>
+        <div>
+          <label>调整方向</label>
+          <select name="direction">
+            <option>慢针方向</option>
+            <option>快针方向</option>
+            <option>其他处理</option>
+          </select>
+        </div>
+        <div class="full">
+          <label>调校量</label>
+          <input name="amount" required placeholder="如 游丝快慢针向慢侧微调0.3格" />
+        </div>
+        <div class="full">
+          <label>备注</label>
+          <textarea name="note" placeholder="选填"></textarea>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" type="submit">写入调校并清期</button>
+      </div>
+    </form>
+
+    <div class="section-title">登记复测（振幅下降 &gt; 20° 立即预警）</div>
+    <form class="entry" id="retestForm">
+      <div class="form-grid">
+        <div>
+          <label>日差（秒/日）</label>
+          <input name="dailyRateSeconds" type="number" step="0.1" required placeholder="如 8" />
+        </div>
+        <div>
+          <label>振幅（度）</label>
+          <input name="amplitude" type="number" min="0" max="360" required placeholder="如 210" />
+        </div>
+        <div class="full">
+          <label>复测时间（留空为现在）</label>
+          <input name="testedAt" type="datetime-local" step="1" />
+        </div>
+        <div class="full">
+          <label>备注</label>
+          <textarea name="note" placeholder="选填"></textarea>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" type="submit">提交复测</button>
+      </div>
+    </form>
+
+    <div class="section-title">复测记录（${retests.length}）</div>
+    ${retestHtml}
+
+    <div class="section-title">调校记录（${adjustments.length}）</div>
+    ${adjustmentHtml}
+  `;
+
+  $("#adjustmentForm").addEventListener("submit", (e) => submitAdjustment(e, clock.id));
+  $("#retestForm").addEventListener("submit", (e) => submitRetest(e, clock.id));
+}
+
+function miniWarningText(w) {
+  const head = `振幅 ${w.amplitudeBefore}° → ${w.amplitudeAfter}°（↓${w.amplitudeDrop}°）· ${fmtTime(w.createdAt)}`;
+  if (w.status === "unconfirmed") return `🚨 <b>待确认</b> · ${head} · 已等待 ${durationText(Date.now() - new Date(w.createdAt).getTime())}`;
+  if (w.status === "confirmed") return `✅ <b>已确认</b> · ${head}<br />处理人：${esc(w.handledBy)}（${fmtTime(w.confirmedAt)}）${w.confirmNote ? ` · ${esc(w.confirmNote)}` : ""}`;
+  return `🔧 <b>已清除</b> · ${head}<br />${fmtTime(w.periodEndsAt)} 新调校写入后清除${w.handledBy ? `，清除前由 ${esc(w.handledBy)} 已确认` : ""}`;
+}
+
+async function submitAdjustment(event, clockId) {
+  event.preventDefault();
+  const form = event.target;
+  const fd = new FormData(form);
+  const btn = form.querySelector("button[type=submit]");
+  btn.disabled = true;
+  try {
+    const { clearedWarnings } = await api(`/clocks/${encodeURIComponent(clockId)}/adjustments`, {
+      method: "POST",
+      body: {
+        currentDailyRateSeconds: Number(fd.get("currentDailyRateSeconds")),
+        direction: fd.get("direction"),
+        amount: fd.get("amount"),
+        note: fd.get("note") || ""
+      }
+    });
+    toast(`新调校已写入，${clearedWarnings} 条当期预警已清除，重新监测`, "ok");
+    form.reset();
+    await loadHistory(clockId, { silent: true });
+    await loadWarnings();
+  } catch (error) {
+    toast(error.message, "err");
+    btn.disabled = false;
+  }
+}
+
+async function submitRetest(event, clockId) {
+  event.preventDefault();
+  const form = event.target;
+  const fd = new FormData(form);
+  const btn = form.querySelector("button[type=submit]");
+  btn.disabled = true;
+  const payload = {
+    dailyRateSeconds: Number(fd.get("dailyRateSeconds")),
+    amplitude: Number(fd.get("amplitude")),
+    note: fd.get("note") || ""
+  };
+  const localTime = fd.get("testedAt");
+  if (localTime) payload.testedAt = new Date(localTime).toISOString();
+  try {
+    const { warning } = await api(`/clocks/${encodeURIComponent(clockId)}/retests`, {
+      method: "POST",
+      body: payload
+    });
+    if (warning) {
+      toast(`复测已登记：振幅下降 ${warning.amplitudeDrop}°，已生成待确认预警`, "err");
+    } else {
+      toast("复测已登记，未触发稳定性预警", "ok");
+    }
+    form.reset();
+    await loadHistory(clockId, { silent: true });
+    await loadWarnings();
+  } catch (error) {
+    toast(error.message, "err");
+    btn.disabled = false;
+  }
+}
+
+function closeDrawer() {
+  openClockId = null;
+  $("#drawer").classList.remove("open");
+  $("#drawerMask").classList.remove("open");
+}
+
+/* ---------- 事件绑定 ---------- */
+
+$("#tabs").addEventListener("click", (e) => {
+  const tab = e.target.closest(".tab");
+  if (!tab) return;
+  currentStatus = tab.dataset.status;
+  $$(".tab").forEach((t) => t.classList.toggle("active", t === tab));
+  loadWarnings().catch((error) => toast(error.message, "err"));
+});
+
+let searchTimer = null;
+$("#searchInput").addEventListener("input", (e) => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    currentKeyword = e.target.value.trim();
+    loadWarnings().catch((error) => toast(error.message, "err"));
+  }, 250);
+});
+
+$("#warningList").addEventListener("click", (e) => {
+  const confirmBtn = e.target.closest(".confirm-btn");
+  if (confirmBtn) return confirmWarning(confirmBtn.closest(".confirm-box").dataset.warningId, confirmBtn);
+  const clockLink = e.target.closest(".clock-link");
+  if (clockLink) return openHistory(clockLink.dataset.clockId).catch((error) => toast(error.message, "err"));
+});
+
+$("#refreshBtn").addEventListener("click", () => {
+  Promise.all([
+    loadWarnings(),
+    openClockId ? loadHistory(openClockId, { silent: true }) : null
+  ]).then(() => toast("结论已刷新", "ok")).catch((error) => toast(error.message, "err"));
+});
+
+$("#drawerClose").addEventListener("click", closeDrawer);
+$("#drawerMask").addEventListener("click", closeDrawer);
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && openClockId) closeDrawer();
+});
+
+/* ---------- 实时等待时长 & 时钟 ---------- */
+
+setInterval(() => {
+  const now = Date.now();
+  $$(".waiting").forEach((el) => {
+    const val = $(".wait-val", el);
+    if (val) val.textContent = durationText(now - new Date(el.dataset.created).getTime());
+  });
+  if (historyClockData) {
+    const byId = new Map(historyClockData.warnings.map((w) => [w.id, w]));
+    $$("#drawerBody .mini-warning.unconfirmed").forEach((el) => {
+      const w = byId.get(el.dataset.warningId);
+      if (w) el.innerHTML = miniWarningText(w);
+    });
+  }
+  $("#clockPill").textContent = new Date().toLocaleTimeString("zh-CN", { hour12: false });
+}, 1000);
+
+setInterval(() => {
+  if ($("#autoRefresh").checked) {
+    loadWarnings().catch(() => {});
+    if (openClockId) loadHistory(openClockId, { silent: true }).catch(() => {});
+  }
+}, 20000);
+
+/* ---------- 初始化 ---------- */
+
+loadWarnings().catch((error) => toast(error.message, "err"));
+</script>
+</body>
+</html>
